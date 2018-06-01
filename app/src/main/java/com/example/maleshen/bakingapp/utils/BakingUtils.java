@@ -16,8 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import moera.ermais.google.com.popular_movies.R;
-import moera.ermais.google.com.popular_movies.model.Movie;
+
 
 
 public class BakingUtils {
@@ -30,7 +29,7 @@ public class BakingUtils {
      * This method parses JSON from a web response and returns an array of Strings
      * describing the movies.
      *
-     * @param forecastJsonStr JSON response from server
+     * @param bakingJsonStr JSON response from server
      * @return Array of Strings describing movies data
      * @throws JSONException If JSON data cannot be properly parsed
      */
@@ -53,10 +52,12 @@ public class BakingUtils {
 
             receipt.setId(receiptJson.getInt("id"));
             receipt.setImage(receiptJson.getString("image"));
-            receipt.setIngredients();
+            List<Ingredient> ingredients = getSimpleIngridientStringsFromJson(context, receiptJson.getJSONArray("ingredients"));
+            receipt.setIngredients(ingredients);
             receipt.setName(receiptJson.getString("name"));
             receipt.setServings(receiptJson.getInt("servings"));
-            receipt.setSteps();
+            List<Step> steps = getSimpleStepStringsFromJson(context, receiptJson.getJSONArray("steps"));
+            receipt.setSteps(steps);
 
 
             parsedReceiptData.add(receipt);
@@ -87,7 +88,7 @@ public class BakingUtils {
         return BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
     }
 
-    public static List<Ingredient> getSimpleIngridientStringsFromJson(Context context, String ingridientsJsonStr)
+    public static List<Ingredient> getSimpleIngridientStringsFromJson(Context context, JSONArray ingridientsJsonStr)
             throws JSONException {
 
         List<Ingredient> parsedIngridientData;
@@ -109,7 +110,7 @@ public class BakingUtils {
         return parsedIngridientData;
     }
 
-    public static List<Step> getSimpleStepStringsFromJson(Context context, String stepJsonStr)
+    public static List<Step> getSimpleStepStringsFromJson(Context context, JSONArray stepJsonStr)
             throws JSONException {
 
         List<Step> parsedStepData;
@@ -121,19 +122,18 @@ public class BakingUtils {
             JSONObject stepJson = stepArray.getJSONObject(i);
             Step step = new Step();
 
-            step.setDescription(stepJson.getString());
-            step.setId();
-            step.setShortDescription(stepJson.getString());
-            step.setThumbnailURL(stepJson.getString());
-            step.setVideoURL(stepJson.getString());
-            ingredient.setIngredient(stepJson.getString("ingredient"));
-            ingredient.setQuantity(stepJson.getDouble("quantity"));
-            ingredient.setMeasure(stepJson.getString("measure"));
+            step.setDescription(stepJson.getString("description"));
+            step.setId(stepJson.getInt("id"));
+            step.setShortDescription(stepJson.getString("shortDescription"));
+            step.setThumbnailURL(stepJson.getString("thumbnailURL"));
+            step.setVideoURL(stepJson.getString("videoURL"));
+
 
             parsedStepData.add(step);
 
         }
         return parsedStepData;
     }
+
 
 }

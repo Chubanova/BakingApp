@@ -3,6 +3,8 @@ package com.example.maleshen.bakingapp.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.List;
+
 public class Receipt implements Parcelable {
     /**
      * id	1
@@ -14,10 +16,12 @@ public class Receipt implements Parcelable {
      */
     private int id;
     private String name;
-    private Ingredient[] ingredients;
-    private Step[] steps;
+    private List<Ingredient> ingredients;
+    private List<Step> steps;
     private int servings;
     private String image;
+    private byte[] imageByte;
+
 
     public Receipt() {
     }
@@ -27,6 +31,11 @@ public class Receipt implements Parcelable {
         name = in.readString();
         servings = in.readInt();
         image = in.readString();
+        int length = in.readInt();
+        if (length != -1) {
+            imageByte = new byte[length];
+            in.readByteArray(imageByte);
+        }
     }
 
     public static final Creator<Receipt> CREATOR = new Creator<Receipt>() {
@@ -52,6 +61,8 @@ public class Receipt implements Parcelable {
         dest.writeString(name);
         dest.writeInt(servings);
         dest.writeString(image);
+        dest.writeInt(imageByte == null ? -1 : imageByte.length);
+        dest.writeByteArray(imageByte);
     }
 
     public int getId() {
@@ -70,19 +81,20 @@ public class Receipt implements Parcelable {
         this.name = name;
     }
 
-    public Ingredient[] getIngredients() {
-        return ingredients;
-    }
 
-    public void setIngredients(Ingredient[] ingredients) {
+    public void setIngredients(List<Ingredient> ingredients) {
         this.ingredients = ingredients;
     }
 
-    public Step[] getSteps() {
+    public List<Ingredient> getIngredients() {
+        return ingredients;
+    }
+
+    public List<Step> getSteps() {
         return steps;
     }
 
-    public void setSteps(Step[] steps) {
+    public void setSteps(List<Step> steps) {
         this.steps = steps;
     }
 
@@ -100,5 +112,13 @@ public class Receipt implements Parcelable {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public byte[] getImageByte() {
+        return imageByte;
+    }
+
+    public void setImageByte(byte[] imageByte) {
+        this.imageByte = imageByte;
     }
 }
