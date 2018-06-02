@@ -1,6 +1,5 @@
 package com.example.maleshen.bakingapp.utils;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -16,9 +15,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
-
 public class BakingUtils {
 
     private BakingUtils() {
@@ -33,12 +29,11 @@ public class BakingUtils {
      * @return Array of Strings describing movies data
      * @throws JSONException If JSON data cannot be properly parsed
      */
-    public static List<Receipt> getSimpleReceiptStringsFromJson(Context context, String bakingJsonStr)
+    public static List<Receipt> getSimpleReceiptStringsFromJson(String bakingJsonStr)
             throws JSONException {
 
-        List<Receipt> parsedReceiptData;
+        List<Receipt> parsedReceiptData = new ArrayList<>();
         JSONArray bakingArray = new JSONArray(bakingJsonStr);
-        parsedReceiptData = new ArrayList<>();
 
         for (int i = 0; i < bakingArray.length(); i++) {
             /* Get the JSON object representing the day */
@@ -51,14 +46,13 @@ public class BakingUtils {
              */
 
             receipt.setId(receiptJson.getInt("id"));
-            receipt.setImage(receiptJson.getString("image"));
-            List<Ingredient> ingredients = getSimpleIngridientStringsFromJson(context, receiptJson.getJSONArray("ingredients"));
-            receipt.setIngredients(ingredients);
             receipt.setName(receiptJson.getString("name"));
+            receipt.setImage(receiptJson.getString("image"));
+            List<Ingredient> ingredients = getSimpleIngridientStringsFromJson(receiptJson.getJSONArray("ingredients"));
+            receipt.setIngredients(ingredients);
             receipt.setServings(receiptJson.getInt("servings"));
-            List<Step> steps = getSimpleStepStringsFromJson(context, receiptJson.getJSONArray("steps"));
+            List<Step> steps = getSimpleStepStringsFromJson(receiptJson.getJSONArray("steps"));
             receipt.setSteps(steps);
-
 
             parsedReceiptData.add(receipt);
         }
@@ -88,12 +82,9 @@ public class BakingUtils {
         return BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
     }
 
-    public static List<Ingredient> getSimpleIngridientStringsFromJson(Context context, JSONArray ingridientsJsonStr)
+    private static List<Ingredient> getSimpleIngridientStringsFromJson(JSONArray ingridientArray)
             throws JSONException {
-
-        List<Ingredient> parsedIngridientData;
-        JSONArray ingridientArray = new JSONArray(ingridientsJsonStr);
-        parsedIngridientData = new ArrayList<>();
+        List<Ingredient> parsedIngredientData = new ArrayList<>();
 
         for (int i = 0; i < ingridientArray.length(); i++) {
             /* Get the JSON object representing the day */
@@ -104,18 +95,14 @@ public class BakingUtils {
             ingredient.setQuantity(ingridientJson.getDouble("quantity"));
             ingredient.setMeasure(ingridientJson.getString("measure"));
 
-            parsedIngridientData.add(ingredient);
-
+            parsedIngredientData.add(ingredient);
         }
-        return parsedIngridientData;
+        return parsedIngredientData;
     }
 
-    public static List<Step> getSimpleStepStringsFromJson(Context context, JSONArray stepJsonStr)
+    private static List<Step> getSimpleStepStringsFromJson(JSONArray stepArray)
             throws JSONException {
-
-        List<Step> parsedStepData;
-        JSONArray stepArray = new JSONArray(stepJsonStr);
-        parsedStepData = new ArrayList<>();
+        List<Step> parsedStepData = new ArrayList<>();
 
         for (int i = 0; i < stepArray.length(); i++) {
             /* Get the JSON object representing the day */
@@ -128,12 +115,8 @@ public class BakingUtils {
             step.setThumbnailURL(stepJson.getString("thumbnailURL"));
             step.setVideoURL(stepJson.getString("videoURL"));
 
-
             parsedStepData.add(step);
-
         }
         return parsedStepData;
     }
-
-
 }
