@@ -35,8 +35,9 @@ public class BakingFragment extends Fragment implements LoaderManager.LoaderCall
 
     // Define a new interface OnImageClickListener that triggers a callback in the host activity
     OnClickListener mCallback;
+
     public interface OnClickListener {
-        void onClick(View position);
+        void onClick(Receipt receipt);
     }
     // OnImageClickListener interface, calls a method in the host activity named onImageSelected
 
@@ -74,20 +75,11 @@ public class BakingFragment extends Fragment implements LoaderManager.LoaderCall
 
         // Create the adapter
         // This adapter takes in the context and an ArrayList of ALL the image resources to display
-       myBakingAdapter = new MyBakingAdapter(getContext());
+        myBakingAdapter = new MyBakingAdapter(getContext());
 
         // Set the adapter on the GridView
         recyclerView.setAdapter(myBakingAdapter);
         getLoaderManager().restartLoader(0, new Bundle(), this);
-
-        // Set a click listener on the textView and trigger the callback onImageSelected when an item is clicked
-        recyclerView.setOnClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-            }
-        });
 
         // Return the root view
         return rootView;

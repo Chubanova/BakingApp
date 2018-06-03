@@ -1,13 +1,17 @@
 package com.example.maleshen.bakingapp;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
+
+import com.example.maleshen.bakingapp.model.Receipt;
 
 public class MainActivity extends AppCompatActivity implements BakingFragment.OnClickListener {
     private MyBakingAdapter myBakingAdapter;
@@ -36,9 +40,18 @@ public class MainActivity extends AppCompatActivity implements BakingFragment.On
 
     }
 
+
     @Override
-    public void onClick(View position) {
-        Toast.makeText(this, "Position clicked = " + position, Toast.LENGTH_SHORT).show();
+    public void onClick(Receipt receipt) {
+        Toast.makeText(this, "Position clicked = " + receipt.getName(), Toast.LENGTH_SHORT).show();
+        Bundle b = new Bundle();
+        b.putParcelable("RECEIPT", receipt);
+        final Intent intent = new Intent(this, ReceiptActivity.class);
+        intent.putExtras(b);
+
+
+        startActivity(intent);
+
 
     }
 }
