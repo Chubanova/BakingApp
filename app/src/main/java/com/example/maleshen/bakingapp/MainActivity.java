@@ -43,15 +43,10 @@ public class MainActivity extends AppCompatActivity implements BakingFragment.On
 
     @Override
     public void onClick(Receipt receipt) {
-        Toast.makeText(this, "Position clicked = " + receipt.getName(), Toast.LENGTH_SHORT).show();
         Bundle b = new Bundle();
-        b.putParcelable("RECEIPT", receipt);
+        b.putParcelable(String.valueOf(R.string.RECEIPT), receipt);
         final Intent intent = new Intent(this, ReceiptActivity.class);
         intent.putExtras(b);
-
-
         startActivity(intent);
-
-
     }
 }

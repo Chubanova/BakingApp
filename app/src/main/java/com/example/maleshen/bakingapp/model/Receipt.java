@@ -3,6 +3,7 @@ package com.example.maleshen.bakingapp.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Receipt implements Parcelable {
@@ -31,6 +32,11 @@ public class Receipt implements Parcelable {
         name = in.readString();
         servings = in.readInt();
         image = in.readString();
+        ingredients = new ArrayList<Ingredient>();
+        in.readTypedList(ingredients, Ingredient.CREATOR);
+
+        steps = new ArrayList<Step>();
+        in.readTypedList(steps, Step.CREATOR);
         int length = in.readInt();
         if (length != -1) {
             imageByte = new byte[length];
@@ -61,6 +67,8 @@ public class Receipt implements Parcelable {
         dest.writeString(name);
         dest.writeInt(servings);
         dest.writeString(image);
+        dest.writeTypedList(ingredients);
+        dest.writeTypedList(steps);
         dest.writeInt(imageByte == null ? -1 : imageByte.length);
         dest.writeByteArray(imageByte);
     }
