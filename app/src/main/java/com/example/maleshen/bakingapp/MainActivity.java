@@ -24,10 +24,6 @@ public class MainActivity extends AppCompatActivity implements BakingFragment.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        recyclerView = findViewById(R.id.recycler_view);
-//        myBakingAdapter = new MyBakingAdapter(this);
-//        recyclerView.setAdapter(myBakingAdapter);
-//        https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json
         Log.d(TAG, "onCreate");
 
         setTitle("BakingApp");
@@ -43,10 +39,13 @@ public class MainActivity extends AppCompatActivity implements BakingFragment.On
 
     @Override
     public void onClick(Receipt receipt) {
+        BakingService.startActionReceiptIngridient(this, receipt);
+
         Bundle b = new Bundle();
         b.putParcelable(String.valueOf(R.string.RECEIPT), receipt);
         final Intent intent = new Intent(this, ReceiptActivity.class);
         intent.putExtras(b);
         startActivity(intent);
+
     }
 }
