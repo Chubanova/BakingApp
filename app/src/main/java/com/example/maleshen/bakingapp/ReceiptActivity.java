@@ -1,14 +1,21 @@
 package com.example.maleshen.bakingapp;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.maleshen.bakingapp.model.Ingredient;
@@ -30,19 +37,22 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
+import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
 import java.util.List;
+import java.util.Objects;
+
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+import static com.google.android.exoplayer2.C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING;
 
 public class ReceiptActivity extends AppCompatActivity implements
         ReceiptFragment.OnClickListener, EventListener {
     public static final String TAG = ReceiptActivity.class.getSimpleName();
 
     private Receipt mReceipt;
-    private TextView mIngridientTV;
-    private RecyclerView mListStepsRV;
     private List<Ingredient> ingredient;
     private List<Step> steps;
 
@@ -52,11 +62,18 @@ public class ReceiptActivity extends AppCompatActivity implements
 
     private TextView mInstruction;
     private PlayerView mPlayerView;
+    private FrameLayout mMainMediaFrame;
     private SimpleExoPlayer mExoPlayer;
-    MediaSource videoSource;
     private static MediaSessionCompat mMediaSession;
     private PlaybackStateCompat.Builder mStateBuilder;
-    private boolean mTwoPanel;
+
+    private Dialog mFullScreenDialog;
+    private boolean mExoPlayerFullscreen = false;
+    private ImageView mFullScreenIcon;
+    private FrameLayout mFullScreenButton;
+
+    public ReceiptActivity() {
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +81,13 @@ public class ReceiptActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_receipt);
         ReceiptFragment receiptFragment = new ReceiptFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
+
+        // On change device orientation recreate fragment
+        if (fragmentManager.getFragments().size() > 0) {
+            for (Fragment fragment : fragmentManager.getFragments()) {
+                fragmentManager.beginTransaction().remove(fragment).commit();
+            }
+        }
 
         mReceipt = getIntent().getParcelableExtra(String.valueOf(R.string.RECEIPT));
         Log.d(TAG, mReceipt.getName());
@@ -74,16 +98,26 @@ public class ReceiptActivity extends AppCompatActivity implements
         if (findViewById(R.id.scroll) != null) {
             mTwoPane = true;
 
-            mPlayerView = (PlayerView) findViewById(R.id.exoplayer);
+            mPlayerView = findViewById(R.id.exoplayer);
+            mMainMediaFrame = findViewById(R.id.main_media_frame);
             mStep = steps.get(0);
-
+            if (savedInstanceState != null && savedInstanceState.getParcelable(String.valueOf(R.string.STEP)) != null) {
+                mStep = savedInstanceState.getParcelable(String.valueOf(R.string.STEP));
+            }
 
             mInstruction = findViewById(R.id.instruction);
             setInstruction(mStep);
+
+            initFullscreenDialog();
+            initFullscreenButton();
         } else {
             mTwoPane = false;
         }
 
+        // Set activity title
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(mReceipt.getName());
+        }
 
         receiptFragment.setMrReceipt(mReceipt);
 
@@ -94,20 +128,26 @@ public class ReceiptActivity extends AppCompatActivity implements
 
     private void setInstruction(Step step) {
         Log.d(TAG, step.getDescription() + "  " + step.getVideoURL());
-
         mInstruction.setText(step.getDescription());
-        if (step.getVideoURL() != null) {
 
+        destroyPlayer();
+        if (step.getVideoURL() != null && !step.getVideoURL().isEmpty()) {
             initializeMediaSession();
 
-            if (mExoPlayer != null) {
-                mExoPlayer.stop();
-                mExoPlayer.release();
-            }
-            mExoPlayer = null;
+            mPlayerView.setVisibility(View.VISIBLE);
+            mMainMediaFrame.setVisibility(View.VISIBLE);
+            ViewGroup.LayoutParams lp = mMainMediaFrame.getLayoutParams();
+            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            mMainMediaFrame.setLayoutParams(lp);
 
             initializePlayer(Uri.parse(step.getVideoURL()));
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(String.valueOf(R.string.STEP), mStep);
     }
 
 
@@ -115,16 +155,13 @@ public class ReceiptActivity extends AppCompatActivity implements
     public void onClick(Step item) {
         if (mTwoPane) {
             mStep = item;
-
             setInstruction(mStep);
-
         } else {
             Bundle b = new Bundle();
             b.putParcelable(String.valueOf(R.string.ITEM), item);
             b.putParcelable(String.valueOf(R.string.RECEIPT), mReceipt);
             final Intent intent = new Intent(this, StepActivity.class);
             intent.putExtras(b);
-
 
             startActivity(intent);
         }
@@ -134,8 +171,7 @@ public class ReceiptActivity extends AppCompatActivity implements
         if (mExoPlayer == null) {
             // Create an instance of the ExoPlayer.
             TrackSelector trackSelector = new DefaultTrackSelector();
-            LoadControl loadControl = new DefaultLoadControl();
-            mExoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector, loadControl);
+            mExoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
             mPlayerView.setPlayer(mExoPlayer);
 
             // Set the ExoPlayer.EventListener to this activity.
@@ -143,11 +179,12 @@ public class ReceiptActivity extends AppCompatActivity implements
             mPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
 
             // Prepare the MediaSource.
-            String userAgent = Util.getUserAgent(this, "BakingApp");
-            MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
-                    this, userAgent), new DefaultExtractorsFactory(), null, null);
+            String userAgent = Util.getUserAgent(this, String.valueOf(R.string.app_name));
+            ExtractorMediaSource.Factory mFactory = new ExtractorMediaSource.Factory( new DefaultDataSourceFactory(this, userAgent));
+            MediaSource mediaSource = mFactory.createMediaSource(mediaUri, null, null);
             mExoPlayer.prepare(mediaSource);
             mExoPlayer.setPlayWhenReady(true);
+            mPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH);
         }
     }
 
@@ -183,6 +220,50 @@ public class ReceiptActivity extends AppCompatActivity implements
 
     }
 
+    private void initFullscreenDialog() {
+
+        mFullScreenDialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
+            public void onBackPressed() {
+                if (mExoPlayerFullscreen)
+                    closeFullscreenDialog();
+                super.onBackPressed();
+            }
+        };
+    }
+
+    private void openFullscreenDialog() {
+
+        ((ViewGroup) mPlayerView.getParent()).removeView(mPlayerView);
+        mFullScreenDialog.addContentView(mPlayerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(ReceiptActivity.this, R.drawable.ic_fullscreen_skrink));
+        mExoPlayerFullscreen = true;
+        mFullScreenDialog.show();
+    }
+
+    private void closeFullscreenDialog() {
+
+        ((ViewGroup) mPlayerView.getParent()).removeView(mPlayerView);
+        ((FrameLayout) findViewById(R.id.main_media_frame)).addView(mPlayerView);
+        mExoPlayerFullscreen = false;
+        mFullScreenDialog.dismiss();
+        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(ReceiptActivity.this, R.drawable.ic_fullscreen_expand));
+    }
+
+    private void initFullscreenButton() {
+
+        PlayerControlView controlView = mPlayerView.findViewById(R.id.exo_controller);
+        mFullScreenIcon = controlView.findViewById(R.id.exo_fullscreen_icon);
+        mFullScreenButton = controlView.findViewById(R.id.exo_fullscreen_button);
+        mFullScreenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mExoPlayerFullscreen)
+                    openFullscreenDialog();
+                else
+                    closeFullscreenDialog();
+            }
+        });
+    }
 
     /**
      * Media Session Callbacks, where all external clients control the player.
@@ -252,5 +333,32 @@ public class ReceiptActivity extends AppCompatActivity implements
     @Override
     public void onSeekProcessed() {
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        destroyPlayer();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onStop() {
+        destroyPlayer();
+        super.onStop();
+    }
+
+    private void destroyPlayer() {
+        if (mExoPlayer != null) {
+            mExoPlayer.stop();
+            mExoPlayer.release();
+            mExoPlayer = null;
+        }
+        if (mPlayerView != null) {
+            mPlayerView.setVisibility(View.INVISIBLE);
+            mMainMediaFrame.setVisibility(View.INVISIBLE);
+            ViewGroup.LayoutParams lp = mMainMediaFrame.getLayoutParams();
+            lp.height = 1;
+            mMainMediaFrame.setLayoutParams(lp);
+        }
     }
 }

@@ -2,19 +2,22 @@ package com.example.maleshen.bakingapp;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-
+import com.example.maleshen.bakingapp.model.Ingredient;
 import com.example.maleshen.bakingapp.model.Receipt;
 import com.example.maleshen.bakingapp.model.Step;
+
+import java.util.List;
+import java.util.Objects;
 
 
 public class ReceiptFragment extends Fragment {
@@ -27,8 +30,8 @@ public class ReceiptFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-//        // This makes sure that the host activity has implemented the callback interface
-//        // If not, it throws an exception
+        // This makes sure that the host activity has implemented the callback interface
+        // If not, it throws an exception
         try {
             mCallback = (ReceiptFragment.OnClickListener) context;
         } catch (ClassCastException e) {
@@ -38,10 +41,8 @@ public class ReceiptFragment extends Fragment {
     }
 
     public ReceiptFragment() {
-
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -51,7 +52,11 @@ public class ReceiptFragment extends Fragment {
 
         // Get a reference to the GridView in the fragment_master_list xml layout file
         TextView textView = rootView.findViewById(R.id.receipt_ingredients);
-        textView.setText(mrReceipt.getIngredients().toString());
+        if (savedInstanceState != null) {
+            setMrReceipt((Receipt) savedInstanceState.getParcelable("receipt"));
+        }
+
+        textView.setText(mrReceipt.getIngredientsText(Objects.requireNonNull(getContext())));
 
         RecyclerView recyclerView = rootView.findViewById(R.id.steps);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -59,8 +64,6 @@ public class ReceiptFragment extends Fragment {
         // This adapter takes in the context and an ArrayList of ALL the image resources to display
         receiptAdapter = new ReceiptAdapter(getContext(), mrReceipt.getSteps());
         recyclerView.setAdapter(receiptAdapter);
-//        receiptAdapter.setReceiptsData(mrReceipt);
-        // Set the adapter on the GridView
 
         // Return the root view
         return rootView;
@@ -76,5 +79,11 @@ public class ReceiptFragment extends Fragment {
 
     public void setMrReceipt(Receipt mrReceipt) {
         this.mrReceipt = mrReceipt;
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable("receipt", getMrReceipt());
     }
 }

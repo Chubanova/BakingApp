@@ -28,12 +28,10 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ViewHold
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public TextView mTextView;
-//        public RecyclerView mRecyclerSteps;
 
         public ViewHolder(TextView view) {
             super(view);
             mTextView = view;
-//            mRecyclerSteps = recyclerView;
 
         }
 
@@ -53,9 +51,7 @@ public class ReceiptAdapter extends RecyclerView.Adapter<ReceiptAdapter.ViewHold
         holder.bind(steps.get(position), listener);
     }
 
-//    MyBakingAdapter(Context ct) {
-//        this.listener = (BakingFragment.OnClickListener) ct;
-//    }
+
 
     public ReceiptAdapter(Context localContext, List<Step>steps ) {
         this.localContext = localContext;

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".StepActivity">
 
     <ScrollView
@@ -35,24 +35,34 @@
                 android:layout_width="match_parent"
                 android:layout_height="80dp" />
 
-            <Button
-                android:id="@+id/next_instruction"
-                android:layout_width="113dp"
-                android:layout_height="144dp"
-                android:onClick="nextInstruction"
-                android:text="Next->"
-                tools:layout_editor_absoluteX="32dp"
-                tools:layout_editor_absoluteY="351dp" />
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:columnCount="2"
+                android:orientation="horizontal"
+                android:useDefaultMargins="false">
 
-            <Button
-                android:id="@+id/prev_instruction"
-                android:layout_width="113dp"
-                android:layout_height="144dp"
-                android:onClick="prevInstruction"
-                android:text="Prev"
-                tools:layout_editor_absoluteX="255dp"
-                tools:layout_editor_absoluteY="351dp" />
+                <Button
+                    android:id="@+id/prev_instruction"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:onClick="prevInstruction"
+                    android:text="@string/prevBtnText" />
+
+                <Button
+                    android:id="@+id/next_instruction"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="start"
+                    android:gravity="center"
+                    android:onClick="nextInstruction"
+                    android:text="@string/nextBtnText" />
+
+            </GridLayout>
+
         </LinearLayout>
+
     </ScrollView>
 
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>

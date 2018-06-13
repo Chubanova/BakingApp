@@ -70,10 +70,8 @@ public class Ingredient implements Parcelable {
         dest.writeString(ingredient);
     }
 
-
     @Override
     public String toString() {
         return  ingredient+": "+measure+" * "+quantity+".\n";
-//                '}';
     }
 }

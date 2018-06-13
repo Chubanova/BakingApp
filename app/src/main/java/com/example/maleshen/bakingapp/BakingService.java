@@ -27,7 +27,7 @@ public class BakingService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_BAKING.equals(action)) {
-                final Receipt receipt = intent.getParcelableExtra("RECEIPT");
+                final Receipt receipt = intent.getParcelableExtra(String.valueOf(R.string.RECEIPT));
                 handleBakingIngridiets(receipt);
             }
         }
@@ -36,7 +36,7 @@ public class BakingService extends IntentService {
     public static void startActionReceiptIngridient(Context context, Receipt receipt) {
         Intent intent = new Intent(context, BakingService.class);
         intent.setAction(ACTION_BAKING);
-        intent.putExtra("RECEIPT", receipt);
+        intent.putExtra(String.valueOf(R.string.RECEIPT), receipt);
 
         context.startService(intent);
     }

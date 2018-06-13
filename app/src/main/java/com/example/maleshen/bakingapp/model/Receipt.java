@@ -1,7 +1,10 @@
 package com.example.maleshen.bakingapp.model;
 
+import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.example.maleshen.bakingapp.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +35,9 @@ public class Receipt implements Parcelable {
         name = in.readString();
         servings = in.readInt();
         image = in.readString();
-        ingredients = new ArrayList<Ingredient>();
+        ingredients = new ArrayList<>();
         in.readTypedList(ingredients, Ingredient.CREATOR);
-
-        steps = new ArrayList<Step>();
+        steps = new ArrayList<>();
         in.readTypedList(steps, Step.CREATOR);
         int length = in.readInt();
         if (length != -1) {
@@ -89,7 +91,6 @@ public class Receipt implements Parcelable {
         this.name = name;
     }
 
-
     public void setIngredients(List<Ingredient> ingredients) {
         this.ingredients = ingredients;
     }
@@ -128,5 +129,16 @@ public class Receipt implements Parcelable {
 
     public void setImageByte(byte[] imageByte) {
         this.imageByte = imageByte;
+    }
+
+    public String getIngredientsText(Context context) {
+        StringBuilder result = new StringBuilder();
+
+        result.append(context.getString(R.string.ingredients_header)).append("\n");
+        for (Ingredient ingredient : ingredients) {
+            result.append(ingredient.toString());
+        }
+
+        return result.toString();
     }
 }

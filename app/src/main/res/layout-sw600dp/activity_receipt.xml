@@ -1,60 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal">
 
-
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout
+        android:id="@+id/android_main_linear_layout"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        tools:context=".ReceiptActivity">
-
-        <!-- LinearLayout for holding three Android-Me images -->
-        <LinearLayout
-            android:id="@+id/android_main_linear_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:orientation="vertical">
-
-
-            <FrameLayout
-                android:id="@+id/receipt_container"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerInside" />
-
-
-        </LinearLayout>
-
-    </ScrollView>
-
-
-    <LinearLayout
-        android:id="@+id/scroll"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:background="@android:color/white"
         android:orientation="vertical">
 
-        <com.google.android.exoplayer2.ui.PlayerView
-            android:id="@+id/exoplayer"
-            android:layout_width="384dp"
-            android:layout_height="288dp"
-            android:layout_marginBottom="18dp"
-            android:layout_marginLeft="18dp"
-            android:layout_marginRight="18dp"
-            android:layout_marginTop="18dp"
-            android:adjustViewBounds="true" />
-
-        <TextView
-            android:id="@+id/instruction"
+        <FrameLayout
+            android:id="@+id/receipt_container"
             android:layout_width="match_parent"
-            android:layout_height="80dp" />
-
+            android:layout_height="match_parent"
+            android:scaleType="centerInside" />
 
     </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="top"
+            android:gravity="top" >
+
+            <FrameLayout
+                android:id="@+id/main_media_frame"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#000000"
+                android:gravity="top"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+                    android:id="@+id/exoplayer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="18dp"
+                    android:layout_marginLeft="18dp"
+                    android:layout_marginRight="18dp"
+                    android:layout_marginTop="18dp"
+                    android:adjustViewBounds="true" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/instruction"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:gravity="top"
+                app:layout_constraintTop_toBottomOf="@id/main_media_frame"/>
+        </android.support.constraint.ConstraintLayout>
+
+    </ScrollView>
 
 </LinearLayout>

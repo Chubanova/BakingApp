@@ -16,6 +16,8 @@ import android.widget.RemoteViews;
 
 import com.example.maleshen.bakingapp.model.Receipt;
 
+import java.util.Objects;
+
 /**
  * Implementation of App Widget functionality.
  */
@@ -33,7 +35,7 @@ public class BakingWidget extends AppWidgetProvider {
 
         CharSequence widgetText = context.getString(R.string.appwidget_text);
         if (receipt != null) {
-            widgetText = receipt.getIngredients().toString();
+            widgetText = receipt.getIngredientsText(context);
         }
 
         // Construct the RemoteViews object

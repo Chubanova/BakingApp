@@ -57,9 +57,6 @@ public class MyBakingAdapter extends RecyclerView.Adapter<MyBakingAdapter.ViewHo
         holder.bind(mReceiptData.get(position),listener);
     }
 
-//    MyBakingAdapter(Context ct) {
-//        this.listener = (BakingFragment.OnClickListener) ct;
-//    }
 
     public MyBakingAdapter(Context localContext) {
         this.localContext = localContext;

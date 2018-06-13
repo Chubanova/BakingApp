@@ -1,11 +1,18 @@
 <resources>
-    <string name="app_name">BakingApp</string>
-    <string name="title_activity_main">BakingApp</string>
+    <string name="app_name">Baking Time</string>
+    <string name="title_activity_main">Baking Time</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="RECEIPT">RECEIPT</string>
     <string name="ITEM">ITEM</string>
-    <string name="appwidget_text">EXAMPLE</string>
+    <string name="STEP">step</string>
+
+    <string name="appwidget_text">Select receipt</string>
+    <string name="current_position">current_position</string>
     <string name="add_widget">Add widget</string>
+    <string name="ingredients_header">Ingredients:</string>
+    <string name="nextBtnText">Next</string>
+    <string name="prevBtnText">Prev</string>
+    <string name="error">Error fetching baking data</string>
 </resources>
