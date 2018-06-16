@@ -15,4 +15,5 @@
     <string name="nextBtnText">Next</string>
     <string name="prevBtnText">Prev</string>
     <string name="error">Error fetching baking data</string>
+    <string name="play_when_ready">PlayWhenReady</string>
 </resources>

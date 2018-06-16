@@ -3,16 +3,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ReceiptFragment"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".ReceiptFragment">
+
+    <ImageView
+        android:id="@+id/image_receipt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <ScrollView
+        android:id="@+id/ingredients_scroll"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_margin="@dimen/text_margin"
         android:layout_marginBottom="20dp"
         android:background="@drawable/text_border"
         android:fillViewport="false">
+
 
         <TextView
             android:id="@+id/receipt_ingredients"

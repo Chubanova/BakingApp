@@ -10,7 +10,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,15 +21,13 @@ import android.widget.TextView;
 import com.example.maleshen.bakingapp.model.Ingredient;
 import com.example.maleshen.bakingapp.model.Receipt;
 import com.example.maleshen.bakingapp.model.Step;
-import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Player.EventListener;
 import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -43,10 +41,10 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 
 import java.util.List;
-import java.util.Objects;
 
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-import static com.google.android.exoplayer2.C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 
 public class ReceiptActivity extends AppCompatActivity implements
         ReceiptFragment.OnClickListener, EventListener {
@@ -71,6 +69,11 @@ public class ReceiptActivity extends AppCompatActivity implements
     private boolean mExoPlayerFullscreen = false;
     private ImageView mFullScreenIcon;
     private FrameLayout mFullScreenButton;
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+
+    private static long currentPosition;
+    private static boolean playWhenReady;
 
     public ReceiptActivity() {
     }
@@ -79,10 +82,12 @@ public class ReceiptActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_receipt);
+        ButterKnife.bind(this);
+
         ReceiptFragment receiptFragment = new ReceiptFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
 
-        // On change device orientation recreate fragment
+//         On change device orientation recreate fragment
         if (fragmentManager.getFragments().size() > 0) {
             for (Fragment fragment : fragmentManager.getFragments()) {
                 fragmentManager.beginTransaction().remove(fragment).commit();
@@ -94,6 +99,19 @@ public class ReceiptActivity extends AppCompatActivity implements
         ingredient = mReceipt.getIngredients();
         steps = mReceipt.getSteps();
         Log.d(TAG, String.valueOf(ingredient.toString()));
+        currentPosition = C.POSITION_UNSET;
+        playWhenReady = true;
+
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(mReceipt.getName());
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         if (findViewById(R.id.scroll) != null) {
             mTwoPane = true;
@@ -104,7 +122,10 @@ public class ReceiptActivity extends AppCompatActivity implements
             if (savedInstanceState != null && savedInstanceState.getParcelable(String.valueOf(R.string.STEP)) != null) {
                 mStep = savedInstanceState.getParcelable(String.valueOf(R.string.STEP));
             }
-
+            if (savedInstanceState != null) {
+                currentPosition = savedInstanceState.getLong(String.valueOf(R.string.current_position));
+                playWhenReady = savedInstanceState.getBoolean(String.valueOf(R.string.play_when_ready));
+            }
             mInstruction = findViewById(R.id.instruction);
             setInstruction(mStep);
 
@@ -114,13 +135,8 @@ public class ReceiptActivity extends AppCompatActivity implements
             mTwoPane = false;
         }
 
-        // Set activity title
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(mReceipt.getName());
-        }
-
         receiptFragment.setMrReceipt(mReceipt);
-
+//
         fragmentManager.beginTransaction()
                 .add(R.id.receipt_container, receiptFragment)
                 .commit();
@@ -147,6 +163,11 @@ public class ReceiptActivity extends AppCompatActivity implements
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        if (mExoPlayer != null) {
+            savePlayerState(mExoPlayer.getCurrentPosition(), mExoPlayer.getPlayWhenReady());
+        }
+        outState.putLong(String.valueOf(R.string.current_position), currentPosition);
+        outState.putBoolean(String.valueOf(R.string.play_when_ready), playWhenReady);
         outState.putParcelable(String.valueOf(R.string.STEP), mStep);
     }
 
@@ -180,10 +201,11 @@ public class ReceiptActivity extends AppCompatActivity implements
 
             // Prepare the MediaSource.
             String userAgent = Util.getUserAgent(this, String.valueOf(R.string.app_name));
-            ExtractorMediaSource.Factory mFactory = new ExtractorMediaSource.Factory( new DefaultDataSourceFactory(this, userAgent));
+            ExtractorMediaSource.Factory mFactory = new ExtractorMediaSource.Factory(new DefaultDataSourceFactory(this, userAgent));
             MediaSource mediaSource = mFactory.createMediaSource(mediaUri, null, null);
             mExoPlayer.prepare(mediaSource);
-            mExoPlayer.setPlayWhenReady(true);
+            mExoPlayer.seekTo(currentPosition);
+            mExoPlayer.setPlayWhenReady(playWhenReady);
             mPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH);
         }
     }
@@ -360,5 +382,10 @@ public class ReceiptActivity extends AppCompatActivity implements
             lp.height = 1;
             mMainMediaFrame.setLayoutParams(lp);
         }
+    }
+
+    private void savePlayerState(long _currentPosition, boolean _playWhenReady) {
+        currentPosition = _currentPosition;
+        playWhenReady = _playWhenReady;
     }
 }

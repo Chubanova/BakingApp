@@ -15,6 +15,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +24,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.support.v7.widget.Toolbar;
 
 import com.example.maleshen.bakingapp.IdlingResource.SimpleIdlingResource;
 import com.example.maleshen.bakingapp.model.Ingredient;
@@ -47,12 +49,14 @@ import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.text.TextUtils.isEmpty;
 import static com.google.android.exoplayer2.C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING;
 import static com.google.android.exoplayer2.source.ExtractorMediaSource.DEFAULT_LOADING_CHECK_INTERVAL_BYTES;
 import static com.google.android.exoplayer2.source.ExtractorMediaSource.MIN_RETRY_COUNT_DEFAULT_FOR_MEDIA;
@@ -62,18 +66,22 @@ public class StepActivity extends AppCompatActivity implements EventListener {
     private Step step;
 
     @BindView(R.id.next_instruction)
-     Button mNextInstruction;
+    Button mNextInstruction;
     @BindView(R.id.prev_instruction)
-     Button mPrevInstruction;
+    Button mPrevInstruction;
     private Receipt mReceipt;
     private List<Ingredient> mIngriendt;
     private List<Step> mStep;
     private int countSteps;
     private int numberOfStep;
     @BindView(R.id.instruction)
-     TextView mInstruction;
+    TextView mInstruction;
     @BindView(R.id.exoplayer)
-     PlayerView mPlayerView;
+    PlayerView mPlayerView;
+    @BindView(R.id.image_step)
+    ImageView imageView;
+    @BindView(R.id.step_toolbar)
+    Toolbar mToolbar;
     private SimpleExoPlayer mExoPlayer;
     private static MediaSessionCompat mMediaSession;
     private PlaybackStateCompat.Builder mStateBuilder;
@@ -84,6 +92,7 @@ public class StepActivity extends AppCompatActivity implements EventListener {
     private FrameLayout mFullScreenButton;
 
     private static long currentPosition;
+    private static boolean playWhenReady;
     private static Uri videoUri;
 
     @Override
@@ -109,11 +118,17 @@ public class StepActivity extends AppCompatActivity implements EventListener {
         }
         initializeMediaSession();
         currentPosition = C.POSITION_UNSET;
+        playWhenReady = true;
         if (savedInstanceState != null) {
             currentPosition = savedInstanceState.getLong(String.valueOf(R.string.current_position));
+            playWhenReady = savedInstanceState.getBoolean(String.valueOf(R.string.play_when_ready));
+        }
+        if (!isEmpty(step.getThumbnailURL())) {
+            Uri builtUri = Uri.parse(step.getThumbnailURL()).buildUpon().build();
+            Picasso.with(this).load(builtUri).into(imageView);
         }
 
-        if (!step.getVideoURL().isEmpty()) {
+        if (!isEmpty(step.getVideoURL())) {
             initializePlayer(Uri.parse(step.getVideoURL()));
 
             mPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIXED_WIDTH);
@@ -123,14 +138,23 @@ public class StepActivity extends AppCompatActivity implements EventListener {
             mInstruction.setVisibility(View.GONE);
         }
 
-        // Set activity title
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(mReceipt.getName());
-        }
-
         if (getResources().getConfiguration().orientation != Configuration.ORIENTATION_PORTRAIT) {
             openFullscreenDialog();
         }
+
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(mReceipt.getName());
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                    //go back to "Recipe" screen
+                    finish();
+                }
+            }
+        );
 
         getIdlingResource();
     }
@@ -171,11 +195,11 @@ public class StepActivity extends AppCompatActivity implements EventListener {
 
             // Prepare the MediaSource.
             String userAgent = Util.getUserAgent(this, "BakingApp");
-            ExtractorMediaSource.Factory mFactory = new ExtractorMediaSource.Factory( new DefaultDataSourceFactory(this, userAgent));
+            ExtractorMediaSource.Factory mFactory = new ExtractorMediaSource.Factory(new DefaultDataSourceFactory(this, userAgent));
             MediaSource mediaSource = mFactory.createMediaSource(mediaUri, null, null);
-            mExoPlayer.seekTo(currentPosition);
             mExoPlayer.prepare(mediaSource);
-            mExoPlayer.setPlayWhenReady(true);
+            mExoPlayer.seekTo(currentPosition);
+            mExoPlayer.setPlayWhenReady(playWhenReady);
             mExoPlayer.setVideoScalingMode(VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
         }
     }
@@ -264,7 +288,9 @@ public class StepActivity extends AppCompatActivity implements EventListener {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+
         outState.putLong(String.valueOf(R.string.current_position), currentPosition);
+        outState.putBoolean(String.valueOf(R.string.play_when_ready), playWhenReady);
     }
 
     @Override
@@ -283,6 +309,7 @@ public class StepActivity extends AppCompatActivity implements EventListener {
     private void destroyPlayer() {
         if (mExoPlayer != null) {
             currentPosition = mExoPlayer.getCurrentPosition();
+            playWhenReady = mExoPlayer.getPlayWhenReady();
             mExoPlayer.stop();
             mExoPlayer.release();
             mExoPlayer = null;

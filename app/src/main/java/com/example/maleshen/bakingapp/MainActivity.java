@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -20,16 +21,24 @@ import android.widget.Toast;
 import com.example.maleshen.bakingapp.IdlingResource.SimpleIdlingResource;
 import com.example.maleshen.bakingapp.model.Receipt;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity implements BakingFragment.OnClickListener {
     private static final String TAG = MainActivity.class.getSimpleName();
+    @BindView(R.id.main_toolbar)
+    Toolbar mToolbar;
 
     @SuppressLint("ResourceType")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setTitle(R.string.app_name);
 
-
+//
         BakingFragment bakingFragment = new BakingFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
 

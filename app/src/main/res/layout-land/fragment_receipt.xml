@@ -6,23 +6,35 @@
     android:orientation="horizontal"
     tools:context=".ReceiptFragment">
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="350dp"
         android:layout_height="match_parent"
-        android:layout_margin="@dimen/text_margin"
-        android:layout_marginBottom="20dp"
-        android:background="@drawable/text_border"
-        android:fillViewport="false">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/receipt_ingredients"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/text_padding"
-            android:text="@string/hello_blank_fragment"
-            android:textColor="@color/textColor" />
+        <ImageView
+            android:id="@+id/image_receipt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
-    </ScrollView>
+        <ScrollView
+            android:id="@+id/ingredients_scroll"
+            android:layout_width="350dp"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/text_margin"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/text_border"
+            android:fillViewport="false">
+
+            <TextView
+                android:id="@+id/receipt_ingredients"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/text_padding"
+                android:text="@string/hello_blank_fragment"
+                android:textColor="@color/textColor" />
+
+        </ScrollView>
+    </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/steps"
