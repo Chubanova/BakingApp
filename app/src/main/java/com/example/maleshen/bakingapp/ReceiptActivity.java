@@ -87,7 +87,7 @@ public class ReceiptActivity extends AppCompatActivity implements
         ReceiptFragment receiptFragment = new ReceiptFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
 
-//         On change device orientation recreate fragment
+//      On change device orientation recreate fragment
         if (fragmentManager.getFragments().size() > 0) {
             for (Fragment fragment : fragmentManager.getFragments()) {
                 fragmentManager.beginTransaction().remove(fragment).commit();
@@ -136,7 +136,10 @@ public class ReceiptActivity extends AppCompatActivity implements
         }
 
         receiptFragment.setMrReceipt(mReceipt);
-//
+        if (savedInstanceState != null) {
+            receiptFragment.setRecyclerViewState(savedInstanceState.getParcelable(String.valueOf(R.string.rvState)));
+        }
+
         fragmentManager.beginTransaction()
                 .add(R.id.receipt_container, receiptFragment)
                 .commit();
@@ -169,6 +172,14 @@ public class ReceiptActivity extends AppCompatActivity implements
         outState.putLong(String.valueOf(R.string.current_position), currentPosition);
         outState.putBoolean(String.valueOf(R.string.play_when_ready), playWhenReady);
         outState.putParcelable(String.valueOf(R.string.STEP), mStep);
+        if (getSupportFragmentManager() != null && getSupportFragmentManager().getFragments() != null) {
+            for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+                if (fragment instanceof ReceiptFragment) {
+                    outState.putParcelable(String.valueOf(R.string.rvState), ((ReceiptFragment) fragment).getRecyclerViewState());
+                    break;
+                }
+            }
+        }
     }
 
 

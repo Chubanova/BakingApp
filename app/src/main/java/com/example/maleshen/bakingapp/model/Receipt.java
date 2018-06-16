@@ -141,15 +141,4 @@ public class Receipt implements Parcelable {
 
         return result.toString();
     }
-
-//    public String getIngredientsText() {
-//        StringBuilder result = new StringBuilder();
-//
-//        result.append("Ingredients:").append("\n");
-//        for (Ingredient ingredient : ingredients) {
-//            result.append(ingredient.toString());
-//        }
-//
-//        return result.toString();
-//    }
 }

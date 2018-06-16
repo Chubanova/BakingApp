@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,8 +19,6 @@ import com.example.maleshen.bakingapp.model.Receipt;
 import com.example.maleshen.bakingapp.model.Step;
 import com.squareup.picasso.Picasso;
 
-import java.util.Objects;
-
 import static android.text.TextUtils.isEmpty;
 
 
@@ -32,13 +29,10 @@ public class ReceiptFragment extends Fragment {
     Receipt mrReceipt;
     ImageView imageView;
 
-    private static int currentPositionIngredients = 0;
-    private static int currentPositionSteps = 0;
-
     ScrollView ingredientsSv;
     RecyclerView stepsRv;
 
-    Parcelable recylerViewState;
+    Parcelable recyclerViewState;
 
     @Override
     public void onAttach(Context context) {
@@ -71,25 +65,22 @@ public class ReceiptFragment extends Fragment {
 
         TextView textView = rootView.findViewById(R.id.receipt_ingredients);
         if (savedInstanceState != null) {
-            setMrReceipt((Receipt) savedInstanceState.getParcelable("receipt"));
+            setMrReceipt((Receipt) savedInstanceState.getParcelable(String.valueOf(R.string.RECEIPT)));
         }
         if (!isEmpty(mrReceipt.getImage())) {
             Uri builtUri = Uri.parse(mrReceipt.getImage()).buildUpon().build();
             Picasso.with(getContext()).load(builtUri).into(imageView);
         }
         textView.setText(mrReceipt.getIngredientsText(getContext()));
-        if (!isEmpty(mrReceipt.getImage())) {
-            Uri builtUri = Uri.parse(mrReceipt.getImage()).buildUpon().build();
-            Picasso.with(getContext()).load(builtUri).into(imageView);
-        }
+
         stepsRv.setLayoutManager(new LinearLayoutManager(getContext()));
         // Create the adapter
         // This adapter takes in the context and an ArrayList of ALL the image resources to display
         receiptAdapter = new ReceiptAdapter(getContext(), mrReceipt.getSteps());
         stepsRv.setAdapter(receiptAdapter);
 
-        if (savedInstanceState != null) {
-            stepsRv.getLayoutManager().onRestoreInstanceState(savedInstanceState.getParcelable("rvState"));
+        if (recyclerViewState != null) {
+            stepsRv.getLayoutManager().onRestoreInstanceState(recyclerViewState);
         }
         // Return the root view
         return rootView;
@@ -110,13 +101,20 @@ public class ReceiptFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable("receipt", getMrReceipt());
-        outState.putParcelable("rvState", recylerViewState);
+        outState.putParcelable(String.valueOf(R.string.RECEIPT), getMrReceipt());
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        recylerViewState = stepsRv.getLayoutManager().onSaveInstanceState();
+        recyclerViewState = stepsRv.getLayoutManager().onSaveInstanceState();
+    }
+
+    public Parcelable getRecyclerViewState() {
+        return recyclerViewState;
+    }
+
+    public void setRecyclerViewState(Parcelable recyclerViewState) {
+        this.recyclerViewState = recyclerViewState;
     }
 }
