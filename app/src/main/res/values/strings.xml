@@ -7,6 +7,7 @@
     <string name="RECEIPT">RECEIPT</string>
     <string name="ITEM">ITEM</string>
     <string name="STEP">step</string>
+    <string name="rvState">rvState</string>
 
     <string name="appwidget_text">Select receipt</string>
     <string name="current_position">current_position</string>
